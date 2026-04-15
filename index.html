@@ -655,10 +655,11 @@
     <p class="section-subtitle" style="max-width:480px; margin: 0 auto 2rem;">
       Book a free 30-minute consultation. We'll assess your current state and give you an honest roadmap — no strings attached.
     </p>
-    <div class="cta-form">
-      <input type="email" class="cta-input" placeholder="you@company.com" aria-label="Email address">
-      <button class="btn-primary" onclick="handleSubmit()">Book Consultation</button>
-    </div>
+  <form class="cta-form" id="consultationForm">
+  <input type="email" class="cta-input" placeholder="you@company.com" aria-label="Email address" required>
+  <button type="button" class="btn-primary" onclick="handleSubmit()">Book Consultation</button>
+</form>
+<div class="g-recaptcha" data-sitekey="YOUR_SITE_KEY" style="margin-top: 1rem; display: flex; justify-content: center;"></div>
     <p class="cta-note">Free assessment · No credit card · Response within 24 hours</p>
   </div>
 </section>
@@ -675,6 +676,7 @@
   </div>
 </footer>
 
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
 <script>
   // Nav scroll effect
   const nav = document.getElementById('nav');
@@ -693,7 +695,7 @@
 
   document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
 
-  // Form handler — sends email to Formspree
+  // Form handler — sends email to Formspree with reCAPTCHA
   async function handleSubmit() {
     const input = document.querySelector('.cta-input');
     const btn = document.querySelector('.cta-form .btn-primary');
@@ -707,6 +709,13 @@
         input.style.borderColor = '';
         input.setAttribute('placeholder', 'you@company.com');
       }, 2000);
+      return;
+    }
+
+    // Check if reCAPTCHA is completed
+    const recaptchaResponse = grecaptcha.getResponse();
+    if (!recaptchaResponse) {
+      alert('Please complete the reCAPTCHA check');
       return;
     }
 
@@ -724,6 +733,7 @@
         },
         body: JSON.stringify({
           email: email,
+          'g-recaptcha-response': recaptchaResponse,
           _subject: 'New Consultation Request — ComplianceDocs',
           message: 'New consultation booking request from: ' + email
         })
@@ -735,6 +745,7 @@
         btn.style.background = '#4ADE80';
         btn.style.opacity = '1';
         input.value = '';
+        grecaptcha.reset();
         setTimeout(() => {
           btn.textContent = 'Book Consultation';
           btn.style.background = '';
@@ -745,6 +756,7 @@
         btn.textContent = 'Something went wrong';
         btn.style.background = '#ef4444';
         btn.style.opacity = '1';
+        grecaptcha.reset();
         setTimeout(() => {
           btn.textContent = 'Book Consultation';
           btn.style.background = '';
@@ -756,6 +768,7 @@
       btn.textContent = 'Connection error';
       btn.style.background = '#ef4444';
       btn.style.opacity = '1';
+      grecaptcha.reset();
       setTimeout(() => {
         btn.textContent = 'Book Consultation';
         btn.style.background = '';
